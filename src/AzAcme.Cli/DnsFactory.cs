@@ -22,14 +22,21 @@ namespace AzAcme.Cli
         {
             public DnsProviders Provider { get; set; }
 
-            public DefaultAzureCredential? AzureCredential { get; set; } 
-            
+            public DefaultAzureCredential? AzureCredential { get; set; }
+
             public string? AzureDnsResourceId { get; set; }
             public string? AadTenantId { get; set; }
             public string? ZoneOverride { get; set; }
-            
+
             public string? CloudlfareZoneIdentifier { get; set; }
             public string? CloudlfareApiToken { get; set; }
+
+            public string? Route53AccessKeyId { get; set; }
+            public string? Route53SecretAccessKey { get; set; }
+
+            public string? Route53HostedZoneId { get; set; }
+
+            public string? Route53Region { get; set; }
         }
 
         public static IDnsZone Create(ILogger logger, DnsOptions options)
@@ -38,12 +45,12 @@ namespace AzAcme.Cli
             {
                 case DnsProviders.Azure:
                     {
-                        if(options.AzureCredential == null)
+                        if (options.AzureCredential == null)
                         {
                             throw new ArgumentException("Azure Credentials must be set.");
                         }
 
-                        if(string.IsNullOrEmpty(options.AzureDnsResourceId))
+                        if (string.IsNullOrEmpty(options.AzureDnsResourceId))
                         {
                             throw new ConfigurationException("Azure DNS Resource ID must be set.");
                         }
@@ -63,20 +70,24 @@ namespace AzAcme.Cli
                     }
                 case DnsProviders.Cloudflare:
                     {
-                        if(string.IsNullOrEmpty(options.CloudlfareApiToken))
+                        if (string.IsNullOrEmpty(options.CloudlfareApiToken))
                         {
                             throw new ArgumentException("Cloudflare API Token must be set.");
                         }
 
-                        if(string.IsNullOrEmpty(options.CloudlfareZoneIdentifier))
+                        if (string.IsNullOrEmpty(options.CloudlfareZoneIdentifier))
                         {
                             throw new ConfigurationException("Cloudflare Zone ID must be set.");
                         }
 
-                        Lazy<IDnsZone> zone = new Lazy<IDnsZone>(() => 
+                        Lazy<IDnsZone> zone = new Lazy<IDnsZone>(() =>
                             new CloudflareDnsZone(logger, options.CloudlfareApiToken, options.CloudlfareZoneIdentifier));
 
                         return new LazyDnsZone(zone);
+                    }
+                case DnsProviders.Route53:
+                    {
+
                     }
             }
 
