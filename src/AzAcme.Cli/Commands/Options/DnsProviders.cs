@@ -10,5 +10,6 @@ namespace AzAcme.Cli.Commands.Options
     {
         Azure,
         Cloudflare,
+        Route53,
     }
 }

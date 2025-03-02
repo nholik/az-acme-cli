@@ -51,17 +51,17 @@ namespace AzAcmi
             }
             catch (ProviderException ex)
             {
-                console.MarkupLine("[red]{0}[/]",ex.Message);
+                console.MarkupLine("[red]{0}[/]", ex.Message);
                 if (verbose)
                 {
                     throw;
                 }
-                
+
                 return 1;
             }
-            catch(ConfigurationException ex)
+            catch (ConfigurationException ex)
             {
-                console.MarkupLine("[red]{0}[/]",ex.Message);
+                console.MarkupLine("[red]{0}[/]", ex.Message);
                 if (verbose)
                 {
                     throw;
@@ -126,6 +126,10 @@ namespace AzAcmi
                         ZoneOverride = options.Zone,
                         CloudlfareZoneIdentifier = options.CloudlfareZoneIdentifier,
                         CloudlfareApiToken = options.CloudlfareApiToken,
+                        Route53AccessKeyId = options.AwsAccessKey,
+                        Route53SecretAccessKey = options.AwsSecretKey,
+                        Route53HostedZoneId = options.AwsZoneId,
+                        Route53Region = options.AwsRegion,
                     }
                 );
 
@@ -146,7 +150,7 @@ namespace AzAcmi
 
                 return rc;
             });
-            
+
         }
 
         static async Task<RegistrationCommand> BuildRegistrationCommand(ILogger logger, RegistrationOptions options)
@@ -232,7 +236,7 @@ namespace AzAcmi
                 {
                     var vre = pr.Errors.First() as CommandLine.VersionRequestedError;
 
-                    if(vre != null)
+                    if (vre != null)
                     {
                         return 0;
                     }
