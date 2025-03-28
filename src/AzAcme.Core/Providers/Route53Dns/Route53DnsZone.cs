@@ -41,7 +41,7 @@ namespace AzAcme.Core.Providers.Route53Dns
       // determine the TXT records needed first, so we validate all before applying.
       foreach (var challenge in order.Challenges)
       {
-        var record = DnsHelpers.DetermineTxtRecordName(challenge.Identitifer, this.zoneName);
+        var record = DnsHelpers.DetermineTxtRecordName(challenge.Identitifer, string.Empty);
         challenge.SetRecordName(record);
       }
 
@@ -55,21 +55,67 @@ namespace AzAcme.Core.Providers.Route53Dns
 
 
 
-    public Task<Order> RemoveTxtRecords(Order order)
+    public async Task<Order> RemoveTxtRecords(Order order)
     {
-      throw new NotImplementedException();
+
+      foreach (var challenge in order.Challenges)
+      {
+        var record = DnsHelpers.DetermineTxtRecordName(challenge.Identitifer, string.Empty);
+        challenge.SetRecordName(record);
+      }
+
+      foreach (var challenge in order.Challenges)
+      {
+        await RemoveTxtRecord(challenge);
+      }
+
+      return order;
     }
+
+    private async Task RemoveTxtRecord(DnsChallenge challenge)
+    {
+      var recordSet = new ResourceRecordSet
+      {
+        Name = challenge.TxtRecord,
+        Type = RRType.TXT,
+        TTL = 60,
+        ResourceRecords = new List<ResourceRecord>
+        {
+          new ResourceRecord($"\"{challenge.TxtValue}\"")
+        }
+      };
+
+      var request = new ChangeResourceRecordSetsRequest
+      {
+        HostedZoneId = hostedZoneId,
+        ChangeBatch = new ChangeBatch
+        {
+          Changes = new List<Change>
+          {
+            new Change
+            {
+              Action = ChangeAction.DELETE,
+              ResourceRecordSet = recordSet
+            }
+          }
+        }
+      };
+
+      var response = await route53Client.ChangeResourceRecordSetsAsync(request);
+      logger.LogInformation($"Route53: Removed TXT record for {challenge.TxtRecord}");
+    }
+
     private async Task UpdateTxtRecord(DnsChallenge challenge)
     {
 
       var recordSet = new ResourceRecordSet
       {
-        Name = challenge.Identitifer,
+        Name = challenge.TxtRecord,
         Type = RRType.TXT,
         TTL = 60,
         ResourceRecords = new List<ResourceRecord>
         {
-          new ResourceRecord(challenge.TxtValue)
+          new ResourceRecord($"\"{challenge.TxtValue}\"")
         }
       };
 

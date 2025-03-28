@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AzAcme.Core.Providers.CloudflareDns;
+using AzAcme.Core.Providers.Route53Dns;
 
 namespace AzAcme.Cli
 {
@@ -87,6 +88,30 @@ namespace AzAcme.Cli
                     }
                 case DnsProviders.Route53:
                     {
+                        if (string.IsNullOrEmpty(options.Route53AccessKeyId))
+                        {
+                            throw new ArgumentException("Route53 Access Key ID must be set.");
+                        }
+
+                        if (string.IsNullOrEmpty(options.Route53SecretAccessKey))
+                        {
+                            throw new ArgumentException("Route53 Secret Access Key must be set.");
+                        }
+
+                        if (string.IsNullOrEmpty(options.Route53HostedZoneId))
+                        {
+                            throw new ArgumentException("Route53 Hosted Zone ID must be set.");
+                        }
+
+                        if (string.IsNullOrEmpty(options.Route53Region))
+                        {
+                            throw new ArgumentException("Route53 Region must be set.");
+                        }
+
+                        Lazy<IDnsZone> zone = new Lazy<IDnsZone>(() =>
+                            new Route53DnsZone(logger, options.Route53AccessKeyId, options.Route53SecretAccessKey, options.Route53HostedZoneId, options.Route53Region));
+
+                        return new LazyDnsZone(zone);
 
                     }
             }

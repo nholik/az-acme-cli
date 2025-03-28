@@ -35,7 +35,7 @@ namespace AzAcme.Cli.Commands.Options
         private string[] _sans;
         [Option("sans", Required = false, Separator = ' ', HelpText = "Subjet Alternative Names (SANs) space separated.")]
         public IList<string> SubjectAlternativeNames { get => _sans; set { _sans = value.Select(v => v.TrimEnd(new char[] { '\n', '\r' })).ToArray(); } }
-        
+
         [Option("aad-tenant", Required = false, HelpText = "Explicitly set AAD Tenant ID for obtaining JWT token for Azure DNS API.")]
         public string? AadTenantId { get; set; } = null;
 
@@ -45,7 +45,7 @@ namespace AzAcme.Cli.Commands.Options
         [Option("force-order", HelpText = "Force order / renewal even if not expiring soon.")]
         public bool ForceOrder { get; set; } = false;
 
-        [Option("verification-timeout-seconds",   Required = false, Default = 60, HelpText = "Challenge verification timout in seconds.")]
+        [Option("verification-timeout-seconds", Required = false, Default = 60, HelpText = "Challenge verification timout in seconds.")]
         public int VerificationTimeoutSeconds { get; set; }
 
         [Option("disable-livetable", HelpText = "Disable Live tables. Required for some Azuer DevOps pipelines.")]
@@ -53,14 +53,49 @@ namespace AzAcme.Cli.Commands.Options
 
         [Option("cf-zone-id", Required = false, HelpText = "Zone ID of the Cloudflare-Site. Required when using Cloudflare DNS provider.")]
         public string CloudlfareZoneIdentifier { get; set; }
-        
+
         [Option("cf-api-token", Required = false, HelpText = "Cloudflare API Token with permissions to modify DNS. Required when using Cloudflare DNS provider.")]
         public string CloudlfareApiToken { get; set; }
-        
+
+        private string _awsAccessKey = string.Empty;
+        [Option("aws-access-key", Required = false, HelpText = "AWS Access Key ID. Required when using AWS Route53 DNS provider. If not set, will use AWS_ACCESS_KEY environment variable.")]
+        public string AwsAccessKey
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_awsAccessKey))
+                {
+                    return Environment.GetEnvironmentVariable("AWS_ACCESS_KEY") ?? string.Empty;
+                }
+                return _awsAccessKey;
+            }
+            set { _awsAccessKey = value; }
+        }
+
+        private string _awsSecretKey = string.Empty;
+        [Option("aws-secret-key", Required = false, HelpText = "AWS Secret Access Key. Required when using AWS Route53 DNS provider. If not set, will use AWS_SECRET_KEY environment variable.")]
+        public string AwsSecretKey
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_awsSecretKey))
+                {
+                    return Environment.GetEnvironmentVariable("AWS_SECRET_KEY") ?? string.Empty;
+                }
+                return _awsSecretKey;
+            }
+            set { _awsSecretKey = value; }
+        }
+
+        [Option("aws-region", Required = false, Default = "us-east-1", HelpText = "AWS Region. Required when using AWS Route53 DNS provider.")]
+        public string AwsRegion { get; set; } 
+
+        [Option("aws-zone-id", Required = false, HelpText = "AWS Route53 Hosted Zone ID. Required when using AWS Route53 DNS provider.")]
+        public string AwsZoneId { get; set; }
 
         [Option("dns-lookup", Required = false, Default = "", HelpText = "DNS lookup server pre-defined name or custom IP address for challenge pre-validation.")]
         public string DnsLookup { get; set; }
-        
+
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 
